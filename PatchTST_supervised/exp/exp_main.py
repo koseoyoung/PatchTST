@@ -272,9 +272,17 @@ class Exp_Main(Exp_Basic):
                 pred = outputs  # outputs.detach().cpu().numpy()  # .squeeze()
                 true = batch_y  # batch_y.detach().cpu().numpy()  # .squeeze()
 
+                if 'Linear' in self.args.model or 'TST' in self.args.model:
+                    if self.args.inverse:   
+                        inversed_pred = []
+                        for i in range (pred.shape[0]):
+                            inversed_pred.append(test_data.inverse_transform(pred[i,:,:]))
+                        pred = np.array(inversed_pred)
+             
                 preds.append(pred)
                 trues.append(true)
                 inputx.append(batch_x.detach().cpu().numpy())
+                
                 if i % 20 == 0:
                     input = batch_x.detach().cpu().numpy()
                     gt = np.concatenate((input[0, :, -1], true[0, :, -1]), axis=0)
@@ -284,7 +292,8 @@ class Exp_Main(Exp_Basic):
         if self.args.test_flop:
             test_params_flop((batch_x.shape[1],batch_x.shape[2]))
             exit()
-        preds = np.array(preds)
+            
+        preds = np.array(preds) #(87, 32, 96, 7) =  (# of batches, batch_size, pred_length, num_features)
         trues = np.array(trues)
         inputx = np.array(inputx)
 
@@ -352,6 +361,14 @@ class Exp_Main(Exp_Basic):
                         else:
                             outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
                 pred = outputs.detach().cpu().numpy()  # .squeeze()
+                
+                if 'Linear' in self.args.model or 'TST' in self.args.model:
+                    if self.args.inverse:   
+                        inversed_pred = []
+                        for i in range (pred.shape[0]):
+                            inversed_pred.append(test_data.inverse_transform(pred[i,:,:]))
+                        pred = np.array(inversed_pred)
+                
                 preds.append(pred)
 
         preds = np.array(preds)
